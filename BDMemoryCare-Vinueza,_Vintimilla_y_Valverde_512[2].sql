@@ -350,7 +350,7 @@ CREATE TABLE PlanNutricional (
     idPlanNutricional SMALLINT NOT NULL IDENTITY(1,1),
     idAcompanante INT NOT NULL,
     nombrePlan VARCHAR(50) NOT NULL,
-    comidasDia VARCHAR(50) NOT NULL,
+    comidasDia VARCHAR(2) NOT NULL,
     caloriasDia SMALLINT NOT NULL,
     alimentosRecomendados VARCHAR(50) NOT NULL,
     CONSTRAINT PK_PlanNutricional PRIMARY KEY (idPlanNutricional),
@@ -503,6 +503,9 @@ BEGIN
 END
 GO
 
+--**************************************************************************************************************
+--PROCEDIMIENTOS PARA INGRESO DE DATOS
+--**************************************************************************************************************
 
 --Verificar si existe el procedimiento
 IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarSede')
@@ -526,6 +529,8 @@ END
 GO
 --EXEC InsertarSede 'Quito', 'La Mariscal', 'Av. Amazonas', 'Av. Patria';
 
+--**************************************************************************************************************
+--**************************************************************************************************************
 
 --Verificar si existe el procedimiento
 IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarAdministrador')
@@ -549,13 +554,259 @@ BEGIN
     VALUES (@idSede, @cedula, @nombre, @apellido, @telefono, @email);
 END
 GO
-
 --EXEC InsertarAdministrador 1, '1234567890', 'Juan', 'Pérez', '0987654321', 'juan.perez@example.com';
 
+--**************************************************************************************************************
+--**************************************************************************************************************
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarMedico')
+BEGIN
+    DROP PROCEDURE InsertarMedico
+END
+GO
+--Procedimiento para ingresar registros en la tabla Medico
+CREATE PROCEDURE InsertarMedico
+    @idAdministrador TINYINT,
+    @cedula cedulaIdentidad,
+    @nombre VARCHAR(45),
+    @apellido VARCHAR(45),
+    @telefono CHAR(10),
+    @email correo,
+    @fechaNacimiento DATE,
+    @direccion VARCHAR(100),
+    @especializacion VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Medico (idAdministrador, cedula, nombre, apellido, telefono, email, fechaNacimiento, direccion, especializacion)
+    VALUES (@idAdministrador, @cedula, @nombre, @apellido, @telefono, @email, 
+            @fechaNacimiento, @direccion, @especializacion);
+END
+GO
+--EXEC InsertarMedico 1, '1234568090', 'Juan', 'Pérez', '0987654321', 'juan.perez@gmail.com', '1990-01-01', 'Av. Amazonas', 'Cardiología';
 
 
+--**************************************************************************************************************
+--**************************************************************************************************************
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarActividad')
+BEGIN
+    DROP PROCEDURE InsertarActividad
+END
+GO
+--Procedimiento para ingresar registros en la tabla Actividad
+CREATE PROCEDURE InsertarActividad
+    @nombre VARCHAR(45),
+    @categoria VARCHAR(45),
+    @duracionMaxima TIME,
+    @puntajeMinimo TINYINT,
+    @puntajeMaximo TINYINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Actividad (nombre, categoria, duracionMaxima, puntajeMinimo, puntajeMaximo)
+    VALUES (@nombre, @categoria, @duracionMaxima, @puntajeMinimo, @puntajeMaximo);
+END
+GO
+--EXEC InsertarActividad 'Rompecabezas', 'Didáctico', '00:30:00', 5, 10;
+
+--**************************************************************************************************************
+--**************************************************************************************************************
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarConsejero')
+BEGIN
+    DROP PROCEDURE InsertarConsejero
+END
+GO
+--Procedimiento para ingresar registros en la tabla Consejero
+CREATE PROCEDURE InsertarConsejero
+    @cedula cedulaIdentidad,
+    @nombre VARCHAR(45),
+    @apellido VARCHAR(45),
+    @telefono CHAR(10),
+    @email correo,
+    @fechaNacimiento DATE,
+    @direccion VARCHAR(100),
+    @especializacion VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Consejero (cedula, nombre, apellido, telefono, email, fechaNacimiento, direccion, especializacion)
+    VALUES (@cedula, @nombre, @apellido, @telefono, @email,
+            @fechaNacimiento, @direccion, @especializacion);
+END
+GO
+--EXEC InsertarConsejero '1234067890', 'Ana', 'Pérez', '0987654321', 'anita.perez@example.com', '1990-01-01', 'Av. Amazonas', 'Psicología';
+
+--**************************************************************************************************************
+--**************************************************************************************************************
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarAcompanante')
+BEGIN
+    DROP PROCEDURE InsertarAcompanante
+END
+GO
+--Procedimiento para ingresar registros en la tabla Acompanante
+CREATE PROCEDURE InsertarAcompanante
+    @cedula cedulaIdentidad,
+    @nombre VARCHAR(45),
+    @apellido VARCHAR(45),
+    @telefono CHAR(10),
+    @email correo,
+    @fechaNacimiento DATE,
+    @parentesco VARCHAR(15),
+    @direccion VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Acompanante (cedula, nombre, apellido, telefono, email, fechaNacimiento, parentesco, direccion)
+    VALUES (@cedula, @nombre, @apellido, @telefono, @email,
+            @fechaNacimiento, @parentesco, @direccion);
+END
+GO
+--EXEC InsertarAcompanante '2234557890', 'Stefano', 'Carrera', '0987654321', 'carrera.Stefano@example.com', '1990-01-01', 'Padre', 'Av. Amazonas';
+
+--**************************************************************************************************************
+--**************************************************************************************************************
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarPaciente')
+BEGIN
+    DROP PROCEDURE InsertarPaciente
+END
+GO
+--Procedimiento para ingresar registros en la tabla Paciente
+CREATE PROCEDURE InsertarPaciente
+    @idAcompanante INT,
+    @cedula cedulaIdentidad,
+    @nombre VARCHAR(45),
+    @apellido VARCHAR(45),
+    @fechaNacimiento DATE,
+    @genero VARCHAR(10),
+    @etapa VARCHAR(10),
+    @direccion VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Paciente (idAcompanante, cedula, nombre, apellido, fechaNacimiento, genero, etapa, direccion)
+    VALUES (@idAcompanante, @cedula, @nombre, @apellido, @fechaNacimiento, @genero, @etapa, @direccion);
+END
+GO
+--EXEC InsertarPaciente 1, '0236667890', 'Alberto', 'Valverde', '1990-01-01', 'masculino', 'leve', 'Av. Amazonas';
+
+--**************************************************************************************************************
+--**************************************************************************************************************
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarNutriologo')
+BEGIN
+    DROP PROCEDURE InsertarNutriologo
+END
+GO
+--Procedimiento para ingresar registros en la tabla Nutriologo
+CREATE PROCEDURE InsertarNutriologo
+    @cedula cedulaIdentidad,
+    @nombre VARCHAR(45),
+    @apellido VARCHAR(45),
+    @telefono CHAR(10),
+    @email correo,
+    @fechaNacimiento DATE,
+    @direccion VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Nutriologo (cedula, nombre, apellido, telefono, email, fechaNacimiento, direccion)
+    VALUES (@cedula, @nombre, @apellido, @telefono, @email,
+            @fechaNacimiento, @direccion);
+END
+GO
+--EXEC InsertarNutriologo '1234567890', 'Juan', 'Pérez', '0987654321', 'juan.perez@example.com', '1990-01-01', 'Av. Amazonas';
+
+--**************************************************************************************************************
+--**************************************************************************************************************
 
 
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarCharla')
+BEGIN
+    DROP PROCEDURE InsertarCharla
+END
+GO
+--Procedimiento para ingresar registros en la tabla Charla
+CREATE PROCEDURE InsertarCharla
+    @tema VARCHAR(100),
+    @fechaHora DATETIME
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Charla (tema, fechaHora)
+    VALUES (@tema, @fechaHora);
+END
+GO
+--EXEC InsertarCharla 'Alimentación saludable', '2023-05-15 10:00:00';
+
+--**************************************************************************************************************
+--**************************************************************************************************************
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarPlanNutricional')
+BEGIN
+    DROP PROCEDURE InsertarPlanNutricional
+END
+GO
+--Procedimiento para ingresar registros en la tabla PlanNutricional
+CREATE PROCEDURE InsertarPlanNutricional
+    @idAcompanante INT,
+    @nombrePlan VARCHAR(50),
+    @comidasDia VARCHAR(50),
+    @caloriasDia SMALLINT,
+    @alimentosRecomendados VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO PlanNutricional (idAcompanante, nombrePlan, comidasDia, caloriasDia, alimentosRecomendados)
+    VALUES (@idAcompanante, @nombrePlan, @comidasDia, @caloriasDia, @alimentosRecomendados);
+END
+GO
+--EXEC InsertarPlanNutricional 1, 'Plan para bajar de peso', '3', 1500, 'Frutas, verduras, proteínas magras';
+
+--**************************************************************************************************************
+--**************************************************************************************************************
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarExamenFisico')
+BEGIN
+    DROP PROCEDURE InsertarExamenFisico
+END
+GO
+--Procedimiento para ingresar registros en la tabla ExamenFisico
+CREATE PROCEDURE InsertarExamenFisico
+    @fechaExamen DATE,
+    @rangoVisualMinimo TINYINT,
+    @rangoVisualMaximo TINYINT,
+    @rangoAuditivoMinimo TINYINT,
+    @rangoAuditivoMaximo TINYINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO ExamenFisico (fechaExamen, rangoVisualMinimo, rangoVisualMaximo, rangoAuditivoMinimo, rangoAuditivoMaximo)
+    VALUES (@fechaExamen, @rangoVisualMinimo, @rangoVisualMaximo, @rangoAuditivoMinimo, @rangoAuditivoMaximo);
+END
+GO
+--EXEC InsertarExamenFisico '2023-05-15', 20, 100, 10, 100;
 
 
 
