@@ -812,7 +812,7 @@ GO
 --**************************************************************************************************************
 --PROCEDIMIENTOS PARA NOTIFICACIÓN DE REGISTRO DE NUEVOS USUARIOS
 --**************************************************************************************************************
-
+/*
 --Verificar si existe el procedimiento
 IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'EnviarNotificacionNuevoUsuario')
 BEGIN
@@ -835,6 +835,7 @@ BEGIN
         @body = @mensaje; -- Cuerpo del correo electrónico
 END
 GO
+
 --Trigger que llame al procedimiento almacenado cuando se inserte un nuevo registro en cualquiera de las tablas:
 
 --Verificar si existe el Trigger
@@ -854,6 +855,7 @@ BEGIN
     SELECT @nombreUsuario = nombre + ' ' + apellido, @correoElectronico = email FROM inserted;
     EXEC EnviarNotificacionNuevoUsuario 'Medico', @nombreUsuario, @correoElectronico;
 END
+GO
 
 --Verificar si existe el Trigger
 IF EXISTS(SELECT name FROM sys.objects WHERE type = 'TR' AND name = 'tr_NuevoConsejeroTrigger')
@@ -872,6 +874,7 @@ BEGIN
     SELECT @nombreUsuario = nombre + ' ' + apellido, @correoElectronico = email FROM inserted;
     EXEC EnviarNotificacionNuevoUsuario 'Consejero', @nombreUsuario, @correoElectronico;
 END
+GO
 
 --Verificar si existe el Trigger
 IF EXISTS(SELECT name FROM sys.objects WHERE type = 'TR' AND name = 'tr_NuevoAcompananteTrigger')
@@ -890,6 +893,7 @@ BEGIN
     SELECT @nombreUsuario = nombre + ' ' + apellido, @correoElectronico = email FROM inserted;
     EXEC EnviarNotificacionNuevoUsuario 'Acompanante', @nombreUsuario, @correoElectronico;
 END
+GO
 
 --Verificar si existe el Trigger
 IF EXISTS(SELECT name FROM sys.objects WHERE type = 'TR' AND name = 'tr_NuevoPacienteTrigger')
@@ -910,7 +914,7 @@ BEGIN
     SELECT @correoElectronico = email FROM Acompanante WHERE idAcompanante = @idAcompanante;
     EXEC EnviarNotificacionNuevoUsuario 'Paciente', @nombreUsuario, @correoElectronico;
 END
-
+GO
 
 --Verificar si existe el Trigger
 IF EXISTS(SELECT name FROM sys.objects WHERE type = 'TR' AND name = 'tr_NuevoNutriologoTrigger')
@@ -929,26 +933,68 @@ BEGIN
     SELECT @nombreUsuario = nombre + ' ' + apellido, @correoElectronico = email FROM inserted;
     EXEC EnviarNotificacionNuevoUsuario 'Nutriologo', @nombreUsuario, @correoElectronico;
 END
+GO
+*/
 
 
-
-
-
-
-INSERT INTO Paciente (idAcompanante, cedula, nombre, apellido, fechaNacimiento, genero, etapa, direccion)
-VALUES (1, '1237878901', 'Estefi', 'Vinueza', '1990-01-01', 'mujer', 'Leve', 'Calle 123');
-
-
-IF EXISTS (
-    SELECT 1 FROM sys.configurations 
-    WHERE NAME = 'Database Mail XPs' AND VALUE = 0)
+--**************************************************************************************************************
+--TRIGGER PARA NOTIFICACIÓN DE CHARLA
+--**************************************************************************************************************
+/*
+--Verificar si existe el Trigger
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'TR' AND name = 'tr_NuevaCharlaTrigger')
 BEGIN
-  PRINT 'Enabling Database Mail XPs'
-  EXEC sp_configure 'show advanced options', 1;  
-  RECONFIGURE
-  EXEC sp_configure 'Database Mail XPs', 1;  
-  RECONFIGURE  
+    DROP TRIGGER tr_NuevaCharlaTrigger
 END
+GO
+CREATE TRIGGER tr_NuevaCharlaTrigger
+ON Charla
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @tema VARCHAR(100);
+    DECLARE @fechaHora DATETIME;
+    DECLARE @mensaje VARCHAR(1000);
+    SELECT @tema = tema, @fechaHora = fechaHora FROM inserted;
+    SET @mensaje = 'Se ha creado una nueva charla con el tema ' + @tema + ' y la fecha y hora ' + CONVERT(VARCHAR(20), @fechaHora, 120) + '.';
+    EXEC msdb.dbo.sp_send_dbmail
+        @profile_name = 'titas8018@gmail.com', -- Nombre del perfil de correo electrónico configurado en SQL Server
+        @recipients = 'titas8018@gmail.com', -- Dirección de correo electrónico del destinatario
+        @subject = 'Nueva charla creada', -- Asunto del correo electrónico
+        @body = @mensaje; -- Cuerpo del correo electrónico
+END
+GO*/
+
+--**************************************************************************************************************
+--PROCEDIMIENTO PARA ACTIVIDAD ASIGNADA A PACIENTE
+--**************************************************************************************************************
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'GenerarInformeActividadPorPaciente')
+BEGIN
+    DROP PROCEDURE GenerarInformeActividadPorPaciente
+END
+GO
+--Procedimiento para mostrar actividades asignadas a un paciente por su cédula
+CREATE PROCEDURE GenerarInformeActividadPorPaciente
+    @cedulaPaciente cedulaIdentidad
+AS
+BEGIN
+    SELECT CONCAT(p.nombre, ' ', p.apellido) AS Paciente, COUNT(ra.idActividad) AS CantidadActividades, a.nombre AS TipoActividad
+    FROM ResultadoActividad ra
+    INNER JOIN Actividad a ON ra.idActividad = a.idActividad
+    INNER JOIN Paciente p ON ra.idPaciente = p.idPaciente
+    WHERE p.cedula = @cedulaPaciente
+    GROUP BY CONCAT(p.nombre, ' ', p.apellido), ra.idActividad, a.nombre;
+END
+GO
+
+--EXEC GenerarInformeActividadPorPaciente @cedulaPaciente = '2345678901';
+
+--**************************************************************************************************************
+--PROCEDIMIENTO PARA ACTIVIDAD ASIGNADA A PACIENTE
+--**************************************************************************************************************
+
 
 
 
@@ -979,7 +1025,7 @@ INSERT INTO Sede (canton, sector, callePrincipal, calleSecundaria) VALUES ('Baba
 INSERT INTO Sede (canton, sector, callePrincipal, calleSecundaria) VALUES ('Quevedo', 'Centro Histórico', 'Calle Bolívar', 'Calle Sucre');
 INSERT INTO Sede (canton, sector, callePrincipal, calleSecundaria) VALUES ('Manta', 'Barrio Tarqui', 'Av. 24 de Mayo', 'Av. 4 de Noviembre');
 --
-PRINT 'Se insertó un registro en la tabla 1';
+
 
 -- Ingreso de datos en la tabla Administrador
 INSERT INTO Administrador (idSede, cedula, nombre, apellido, telefono, email) VALUES (1, '1712345678', 'Juan', 'Pérez', '0991234567', 'juan.perez@gmail.com');
