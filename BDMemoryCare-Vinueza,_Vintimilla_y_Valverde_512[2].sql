@@ -809,6 +809,149 @@ GO
 --EXEC InsertarExamenFisico '2023-05-15', 20, 100, 10, 100;
 
 
+--**************************************************************************************************************
+--PROCEDIMIENTOS PARA NOTIFICACIÓN DE REGISTRO DE NUEVOS USUARIOS
+--**************************************************************************************************************
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'EnviarNotificacionNuevoUsuario')
+BEGIN
+    DROP PROCEDURE EnviarNotificacionNuevoUsuario
+END
+GO
+--Procedimiento almacenado que envíe un correo electrónico con la información del nuevo usuario:
+CREATE PROCEDURE EnviarNotificacionNuevoUsuario
+    @tabla VARCHAR(50),
+    @nombreUsuario VARCHAR(50),
+    @correoElectronico VARCHAR(100)
+AS
+BEGIN
+    DECLARE @mensaje VARCHAR(1000);
+    SET @mensaje = 'Se ha registrado un nuevo usuario en la tabla ' + @tabla + ' con el nombre ' + @nombreUsuario + ' y el correo electrónico ' + @correoElectronico + '.';
+    EXEC msdb.dbo.sp_send_dbmail
+        @profile_name = 'PerfilCorreo', -- Nombre del perfil de correo electrónico configurado en SQL Server
+        @recipients = 'thyara.vintimilla@udla.edu.ec', -- Dirección de correo electrónico del destinatario
+        @subject = 'REGISTRO DE NUEVO USUARIO', -- Asunto del correo electrónico
+        @body = @mensaje; -- Cuerpo del correo electrónico
+END
+GO
+--Trigger que llame al procedimiento almacenado cuando se inserte un nuevo registro en cualquiera de las tablas:
+
+--Verificar si existe el Trigger
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'TR' AND name = 'tr_NuevoMedicoTrigger')
+BEGIN
+    DROP TRIGGER tr_NuevoMedicoTrigger
+END
+GO
+--Trigger para registro de nuevo usuario Medico
+CREATE TRIGGER tr_NuevoMedicoTrigger
+ON Medico
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @nombreUsuario VARCHAR(50);
+    DECLARE @correoElectronico VARCHAR(100);
+    SELECT @nombreUsuario = nombre + ' ' + apellido, @correoElectronico = email FROM inserted;
+    EXEC EnviarNotificacionNuevoUsuario 'Medico', @nombreUsuario, @correoElectronico;
+END
+
+--Verificar si existe el Trigger
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'TR' AND name = 'tr_NuevoConsejeroTrigger')
+BEGIN
+    DROP TRIGGER tr_NuevoConsejeroTrigger
+END
+GO
+--Trigger para registro de nuevo usuario Consejero
+CREATE TRIGGER tr_NuevoConsejeroTrigger
+ON Consejero
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @nombreUsuario VARCHAR(50);
+    DECLARE @correoElectronico VARCHAR(100);
+    SELECT @nombreUsuario = nombre + ' ' + apellido, @correoElectronico = email FROM inserted;
+    EXEC EnviarNotificacionNuevoUsuario 'Consejero', @nombreUsuario, @correoElectronico;
+END
+
+--Verificar si existe el Trigger
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'TR' AND name = 'tr_NuevoAcompananteTrigger')
+BEGIN
+    DROP TRIGGER tr_NuevoAcompananteTrigger
+END
+GO
+--Trigger para registro de nuevo usuario Acompanante
+CREATE TRIGGER tr_NuevoAcompananteTrigger
+ON Acompanante
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @nombreUsuario VARCHAR(50);
+    DECLARE @correoElectronico VARCHAR(100);
+    SELECT @nombreUsuario = nombre + ' ' + apellido, @correoElectronico = email FROM inserted;
+    EXEC EnviarNotificacionNuevoUsuario 'Acompanante', @nombreUsuario, @correoElectronico;
+END
+
+--Verificar si existe el Trigger
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'TR' AND name = 'tr_NuevoPacienteTrigger')
+BEGIN
+    DROP TRIGGER tr_NuevoPacienteTrigger
+END
+GO
+--Trigger para registro de nuevo usuario Paciente
+CREATE TRIGGER tr_NuevoPacienteTrigger
+ON Paciente
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @nombreUsuario VARCHAR(50);
+    DECLARE @correoElectronico VARCHAR(100);
+    DECLARE @idAcompanante INT;
+    SELECT @nombreUsuario = nombre + ' ' + apellido, @idAcompanante = idAcompanante FROM inserted;
+    SELECT @correoElectronico = email FROM Acompanante WHERE idAcompanante = @idAcompanante;
+    EXEC EnviarNotificacionNuevoUsuario 'Paciente', @nombreUsuario, @correoElectronico;
+END
+
+
+--Verificar si existe el Trigger
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'TR' AND name = 'tr_NuevoNutriologoTrigger')
+BEGIN
+    DROP TRIGGER tr_NuevoNutriologoTrigger
+END
+GO
+--Trigger para registro de nuevo usuario Paciente
+CREATE TRIGGER tr_NuevoNutriologoTrigger
+ON Nutriologo
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @nombreUsuario VARCHAR(50);
+    DECLARE @correoElectronico VARCHAR(100);
+    SELECT @nombreUsuario = nombre + ' ' + apellido, @correoElectronico = email FROM inserted;
+    EXEC EnviarNotificacionNuevoUsuario 'Nutriologo', @nombreUsuario, @correoElectronico;
+END
+
+
+
+
+
+
+INSERT INTO Paciente (idAcompanante, cedula, nombre, apellido, fechaNacimiento, genero, etapa, direccion)
+VALUES (1, '1237878901', 'Estefi', 'Vinueza', '1990-01-01', 'mujer', 'Leve', 'Calle 123');
+
+
+IF EXISTS (
+    SELECT 1 FROM sys.configurations 
+    WHERE NAME = 'Database Mail XPs' AND VALUE = 0)
+BEGIN
+  PRINT 'Enabling Database Mail XPs'
+  EXEC sp_configure 'show advanced options', 1;  
+  RECONFIGURE
+  EXEC sp_configure 'Database Mail XPs', 1;  
+  RECONFIGURE  
+END
+
+
+
 
 /*
 **********************************
