@@ -671,7 +671,7 @@ INSERT INTO Actividad (nombre, categoria, duracionMaxima, puntajeMinimo, puntaje
 VALUES ('Vocalización', 'Constructivo', '00:05:00', 12, 35);
 
 -- Ingreso de datos en la tabla Acompanante
-SELECT *FROM Acompanante
+
 INSERT INTO Acompanante (cedula, nombre, apellido, telefono, email, fechaNacimiento, parentesco, direccion) VALUES ('1234567890', 'Juan', 'Pérez', '1234567890', 'juan@gmail.com', '2000-01-01', 'Padre', 'Calle 123');
 INSERT INTO Acompanante (cedula, nombre, apellido, telefono, email, fechaNacimiento, parentesco, direccion) VALUES ('1712345678', 'María', 'López', '0987654321', 'maria@hotmail.com', '1995-05-10', 'Madre', 'Avenida 456');
 INSERT INTO Acompanante (cedula, nombre, apellido, telefono, email, fechaNacimiento, parentesco, direccion) VALUES ('2350713661', 'Pedro', 'González', '5432167890', 'pedro@hotmail.com', '1980-12-15', 'Hermano', 'Calle 789');
@@ -694,7 +694,7 @@ INSERT INTO Acompanante (cedula, nombre, apellido, telefono, email, fechaNacimie
 INSERT INTO Acompanante (cedula, nombre, apellido, telefono, email, fechaNacimiento, parentesco, direccion) VALUES ('1717901236', 'Daniela', 'Mendoza', '5432167890', 'daniela@example.com', '1994-04-12', 'Amiga', 'Avenida 9012');
 GO
 -- Ingreso de datos en la tabla Paciente
-SELECT*FROM Paciente
+--SELECT*FROM Paciente
 INSERT INTO Paciente (idAcompanante, cedula, nombre, apellido, fechaNacimiento, genero, etapa, direccion)
 VALUES (1, '1717901239', 'Juan', 'Pérez', '1990-01-01', 'Masculino', 'Leve', 'Calle 123, Calle 12');
 INSERT INTO Paciente (idAcompanante, cedula, nombre, apellido, fechaNacimiento, genero, etapa, direccion)
@@ -737,8 +737,6 @@ INSERT INTO Paciente (idAcompanante, cedula, nombre, apellido, fechaNacimiento, 
 VALUES (20, '1234567890', 'Isabel', 'Gómez', '1984-08-20', 'Femenino', 'Moderada', 'Calle 890, Av.6 de diciembre');
 GO
 
-select * from Actividad
-select * from Paciente
 
 EXEC InsertarResultadoActividad '1717901239', 'Comprensión lectora', 6, '00:08:00';
 EXEC InsertarResultadoActividad '2345678901', 'Sumas y restas', 4, '00:03:00';
@@ -870,12 +868,6 @@ VALUES ('Cómo manejar los problemas de incontinencia en personas con Alzheimer a
 
 INSERT INTO Charla (tema, fechaHora)
 VALUES ('Cómo manejar los problemas de comportamiento en personas con Alzheimer avanzado', '2023-06-03 14:30:00');
-
-
-select * from Charla
-select * from Consejero
-
-select * from AsistenciaConsejero
 
 
 INSERT INTO AsistenciaConsejero (idConsejero, idCharla, horaAsistencia, registroAsiste)
