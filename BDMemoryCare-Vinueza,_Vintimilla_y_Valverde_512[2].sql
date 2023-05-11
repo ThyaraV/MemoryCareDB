@@ -474,6 +474,15 @@ BEGIN
 END
 GO
 
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarResultadoActividad')
+BEGIN
+    DROP PROCEDURE InsertarResultadoActividad
+END
+GO
+
+--Procedimiento almacenado que permita ingresar un registro a la tabla ResultadoActividad, a través de la cedula del Paciente y del nombre de la actividad:
+
 CREATE PROCEDURE InsertarResultadoActividad
     @cedulaPaciente cedulaIdentidad,
     @nombreActividad VARCHAR(45),
@@ -493,6 +502,62 @@ BEGIN
     VALUES (@idActividad, @idPaciente, GETDATE(), @resultado, @duracionTotal);
 END
 GO
+
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarSede')
+BEGIN
+    DROP PROCEDURE InsertarSede
+END
+GO
+--Procedimiento para ingresar registros en la tabla sede
+CREATE PROCEDURE InsertarSede
+    @canton VARCHAR(20),
+    @sector VARCHAR(20),
+    @callePrincipal VARCHAR(50),
+    @calleSecundaria VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Sede (canton, sector, callePrincipal, calleSecundaria)
+    VALUES (@canton, @sector, @callePrincipal, @calleSecundaria);
+END
+GO
+--EXEC InsertarSede 'Quito', 'La Mariscal', 'Av. Amazonas', 'Av. Patria';
+
+
+--Verificar si existe el procedimiento
+IF EXISTS(SELECT name FROM sys.objects WHERE type = 'P' AND name = 'InsertarAdministrador')
+BEGIN
+    DROP PROCEDURE InsertarAdministrador
+END
+GO
+--Procedimiento para ingresar registros en la tabla Administrador
+CREATE PROCEDURE InsertarAdministrador
+    @idSede TINYINT,
+    @cedula cedulaIdentidad,
+    @nombre VARCHAR(45),
+    @apellido VARCHAR(45),
+    @telefono CHAR(10),
+    @email correo
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Administrador (idSede, cedula, nombre, apellido, telefono, email)
+    VALUES (@idSede, @cedula, @nombre, @apellido, @telefono, @email);
+END
+GO
+
+--EXEC InsertarAdministrador 1, '1234567890', 'Juan', 'Pérez', '0987654321', 'juan.perez@example.com';
+
+
+
+
+
+
+
 
 /*
 **********************************
@@ -744,7 +809,7 @@ EXEC InsertarResultadoActividad '2350713622', 'Reconocimiento de colores, sonido
 EXEC InsertarResultadoActividad '1717901236', 'Juegos de memoria', 10, '00:10:00';
 EXEC InsertarResultadoActividad '1717901234', 'Sopas de letras', 10, '00:05:00';
 
-SELECT*FROM ResultadoActividad
+--SELECT*FROM ResultadoActividad
 
 
 INSERT INTO Consejero (cedula, nombre, apellido, telefono, email, fechaNacimiento, direccion, especializacion)
